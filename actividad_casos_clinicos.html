@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ciclo Vital en Consulta · Medicina Familiar</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F2EC;
+    --surface: #FDFCF9;
+    --surface2: #F0EDE5;
+    --ink: #1C1A16;
+    --ink2: #5A5549;
+    --ink3: #9A9288;
+    --accent-purple: #4A3F8F;
+    --accent-purple-light: #EAE7F7;
+    --accent-teal: #1A6B56;
+    --accent-teal-light: #DDF0E9;
+    --accent-amber: #7A4F10;
+    --accent-amber-light: #FDF0D8;
+    --accent-coral: #8B3620;
+    --accent-coral-light: #FCEAE4;
+    --border: rgba(28,26,22,0.1);
+    --border-med: rgba(28,26,22,0.18);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.7;
+  }
+
+  /* ─── Header ─── */
+  .page-header {
+    background: var(--ink);
+    color: #F5F2EC;
+    padding: 3rem 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    border: 1px solid rgba(245,242,236,0.08);
+  }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    border: 1px solid rgba(245,242,236,0.06);
+  }
+  .header-inner { max-width: 860px; margin: 0 auto; position: relative; }
+  .header-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(245,242,236,0.5);
+    border: 1px solid rgba(245,242,236,0.15);
+    padding: 4px 10px;
+    border-radius: 99px;
+    margin-bottom: 1rem;
+  }
+  .header-title {
+    font-family: 'Lora', serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 500;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+    color: #F5F2EC;
+  }
+  .header-title em { font-style: italic; color: rgba(245,242,236,0.65); }
+  .header-meta {
+    font-size: 13px;
+    color: rgba(245,242,236,0.5);
+    display: flex; gap: 20px; flex-wrap: wrap;
+  }
+  .header-meta span::before { content: '· '; }
+  .header-meta span:first-child::before { content: ''; }
+
+  /* ─── Layout ─── */
+  .page-body { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* ─── Instructions box ─── */
+  .instrucciones {
+    background: var(--surface);
+    border: 1px solid var(--border-med);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 2rem;
+  }
+  .instrucciones-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .instrucciones-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--ink); display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .instrucciones-icon svg { width: 16px; height: 16px; fill: #F5F2EC; }
+  .instrucciones-title { font-size: 13px; font-weight: 500; letter-spacing: 0.03em; }
+  .instrucciones p { font-size: 13.5px; color: var(--ink2); line-height: 1.75; }
+  .instrucciones strong { color: var(--ink); font-weight: 500; }
+
+  .steps-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-top: 1.25rem;
+  }
+  .step-pill {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .step-pill .step-n { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 4px; }
+  .step-pill .step-label { font-size: 12.5px; font-weight: 500; color: var(--ink); }
+  .step-pill .step-desc { font-size: 11.5px; color: var(--ink3); margin-top: 2px; }
+
+  /* ─── Case selector ─── */
+  .case-selector {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-bottom: 2rem;
+  }
+  .case-tab {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: left;
+  }
+  .case-tab:hover { border-color: var(--border-med); background: var(--surface); }
+  .case-tab.active-purple { border-color: var(--accent-purple); background: var(--accent-purple-light); }
+  .case-tab.active-teal { border-color: var(--accent-teal); background: var(--accent-teal-light); }
+  .case-tab-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 6px; }
+  .case-tab.active-purple .case-tab-label { color: var(--accent-purple); }
+  .case-tab.active-teal .case-tab-label { color: var(--accent-teal); }
+  .case-tab-name { font-family: 'Lora', serif; font-size: 17px; font-weight: 500; color: var(--ink); }
+  .case-tab-sub { font-size: 12px; color: var(--ink3); margin-top: 3px; }
+
+  /* ─── Case card ─── */
+  .case-panel { display: none; }
+  .case-panel.visible { display: block; }
+
+  .narrative-block {
+    background: var(--surface);
+    border: 1px solid var(--border-med);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  .narrative-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink3);
+    margin-bottom: 0.75rem;
+  }
+  .narrative-text {
+    font-family: 'Lora', serif;
+    font-size: 15px; line-height: 1.85;
+    color: var(--ink);
+  }
+  .patient-chip {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 6px 14px 6px 6px;
+  }
+  .patient-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500;
+  }
+  .avatar-purple { background: var(--accent-purple); color: #fff; }
+  .avatar-teal { background: var(--accent-teal); color: #fff; }
+  .patient-chip-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .patient-chip-age { font-size: 12px; color: var(--ink3); }
+
+  /* ─── BPS grid ─── */
+  .bps-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .bps-card {
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    border: 1px solid transparent;
+  }
+  .bps-card.bio { background: var(--accent-teal-light); border-color: rgba(26,107,86,0.2); }
+  .bps-card.psi { background: var(--accent-purple-light); border-color: rgba(74,63,143,0.2); }
+  .bps-card.soc { background: var(--accent-coral-light); border-color: rgba(139,54,32,0.2); }
+  .bps-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .bps-card.bio .bps-label { color: var(--accent-teal); }
+  .bps-card.psi .bps-label { color: var(--accent-purple); }
+  .bps-card.soc .bps-label { color: var(--accent-coral); }
+  .bps-card p { font-size: 12.5px; color: var(--ink2); line-height: 1.6; }
+
+  /* ─── Step navigation ─── */
+  .step-nav-row {
+    display: flex; gap: 6px; margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+  }
+  .snav-btn {
+    padding: 6px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px; font-weight: 500;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    color: var(--ink3);
+    transition: all 0.15s;
+  }
+  .snav-btn:hover { border-color: var(--border-med); color: var(--ink); }
+  .snav-btn.active-purple { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
+  .snav-btn.active-teal { background: var(--accent-teal); color: #fff; border-color: var(--accent-teal); }
+  .snav-btn.done { background: var(--bg); color: var(--ink3); }
+
+  /* ─── Step content ─── */
+  .step-panel { display: none; }
+  .step-panel.visible { display: block; animation: fadeUp 0.25s ease; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+
+  .step-intro { font-size: 13.5px; color: var(--ink2); margin-bottom: 1.25rem; line-height: 1.7; }
+
+  /* ─── Questions ─── */
+  .questions { list-style: none; margin-bottom: 1.5rem; }
+  .question-item {
+    display: flex; gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .question-item:first-child { border-top: 1px solid var(--border); }
+  .q-num {
+    font-family: 'Lora', serif;
+    font-size: 20px; font-weight: 400;
+    color: var(--ink3);
+    min-width: 26px;
+    line-height: 1.4;
+  }
+  .q-text { font-size: 14px; color: var(--ink); line-height: 1.75; padding-top: 3px; }
+  .q-tag {
+    display: inline-block; font-size: 10px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 4px; margin-left: 6px;
+    vertical-align: middle;
+  }
+  .q-tag.bio { background: var(--accent-teal-light); color: var(--accent-teal); }
+  .q-tag.psi { background: var(--accent-purple-light); color: var(--accent-purple); }
+  .q-tag.soc { background: var(--accent-coral-light); color: var(--accent-coral); }
+  .q-tag.int { background: var(--accent-amber-light); color: var(--accent-amber); }
+
+  /* ─── Highlight box ─── */
+  .highlight-box {
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 1.25rem;
+    font-size: 13.5px; line-height: 1.75;
+  }
+  .highlight-box.amber { background: var(--accent-amber-light); border-left: 3px solid var(--accent-amber); color: var(--accent-amber); }
+  .highlight-box.teal { background: var(--accent-teal-light); border-left: 3px solid var(--accent-teal); color: var(--accent-teal); }
+  .highlight-box strong { font-weight: 500; display: block; margin-bottom: 4px; }
+  .highlight-box p { color: var(--ink2); font-size: 13px; margin-top: 4px; }
+
+  /* ─── Answer area ─── */
+  .answer-area {
+    margin-top: 8px; margin-bottom: 4px;
+    width: 100%;
+    min-height: 72px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--border-med);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    resize: vertical;
+    line-height: 1.7;
+    transition: border-color 0.15s;
+  }
+  .answer-area:focus { outline: none; border-color: var(--border-med); background: var(--surface); }
+  .answer-label { font-size: 11px; color: var(--ink3); margin-top: 4px; font-style: italic; }
+
+  /* ─── Action row ─── */
+  .action-row { display: flex; gap: 8px; margin-top: 1.5rem; flex-wrap: wrap; align-items: center; }
+  .btn {
+    padding: 9px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    border-radius: 99px;
+    border: 1px solid var(--border-med);
+    background: transparent;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary-purple { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); }
+  .btn.primary-purple:hover { background: #3A3070; }
+  .btn.primary-teal { background: var(--accent-teal); color: #fff; border-color: var(--accent-teal); }
+  .btn.primary-teal:hover { background: #155A46; }
+
+  /* ─── Plenaria box ─── */
+  .plenaria-box {
+    background: var(--ink);
+    color: #F5F2EC;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-top: 1.5rem;
+  }
+  .plenaria-title { font-family: 'Lora', serif; font-size: 16px; font-weight: 500; margin-bottom: 0.6rem; }
+  .plenaria-text { font-size: 13px; color: rgba(245,242,236,0.65); line-height: 1.75; }
+  .plenaria-items { list-style: none; margin-top: 12px; }
+  .plenaria-items li {
+    font-size: 13.5px; padding: 8px 0;
+    border-bottom: 1px solid rgba(245,242,236,0.1);
+    display: flex; gap: 10px; color: rgba(245,242,236,0.85);
+  }
+  .plenaria-items li:last-child { border-bottom: none; }
+  .plenaria-items .li-n { color: rgba(245,242,236,0.35); font-family: 'Lora', serif; font-size: 16px; min-width: 20px; }
+
+  /* ─── Progress ─── */
+  .progress-wrap { margin-bottom: 2rem; }
+  .progress-bar-bg { height: 3px; background: var(--border); border-radius: 99px; margin-bottom: 6px; }
+  .progress-bar-fill { height: 3px; border-radius: 99px; background: var(--ink); transition: width 0.4s ease; width: 0%; }
+  .progress-text { font-size: 11.5px; color: var(--ink3); }
+
+  /* ─── Notes area ─── */
+  .notes-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-top: 2rem;
+  }
+  .notes-title { font-size: 13px; font-weight: 500; margin-bottom: 0.75rem; color: var(--ink2); }
+  .notes-area {
+    width: 100%; min-height: 100px;
+    font-family: 'Lora', serif; font-size: 14px;
+    color: var(--ink); background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px; resize: vertical; line-height: 1.8;
+  }
+  .notes-area:focus { outline: none; border-color: var(--border-med); }
+
+  /* ─── Footer ─── */
+  .page-footer {
+    max-width: 860px; margin: 0 auto;
+    padding: 1.5rem 1.5rem 2rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .footer-text { font-size: 11.5px; color: var(--ink3); }
+  .footer-course { font-size: 11.5px; font-weight: 500; color: var(--ink2); }
+
+  @media (max-width: 600px) {
+    .case-selector { grid-template-columns: 1fr; }
+    .bps-grid { grid-template-columns: 1fr; }
+    .steps-row { grid-template-columns: 1fr; }
+    .page-header { padding: 2rem 1.25rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="header-inner">
+    <div class="header-tag">Medicina Familiar · 2.º Semestre Pregrado</div>
+    <h1 class="header-title">Ciclo vital <em>en consulta</em><br>Adultez temprana y media</h1>
+    <div class="header-meta">
+      <span>Actividad grupal colaborativa</span>
+      <span>Enfoque biopsicosocial</span>
+      <span>Constructivismo social</span>
+      <span>Papalia & Feldman</span>
+    </div>
+  </div>
+</header>
+
+<main class="page-body">
+
+  <!-- Instructions -->
+  <div class="instrucciones">
+    <div class="instrucciones-header">
+      <div class="instrucciones-icon">
+        <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm.75 10.5h-1.5v-5h1.5v5zm0-6.5h-1.5V3.5h1.5V5z"/></svg>
+      </div>
+      <span class="instrucciones-title">Instrucciones generales</span>
+    </div>
+    <p>Formen <strong>grupos de 4 a 5 estudiantes</strong>. Cada grupo trabaja un caso clínico resolviendo las tres etapas de forma progresiva. <strong>No avancen a la siguiente etapa</strong> sin haber discutido las preguntas anteriores en grupo. Al finalizar, cada grupo designa un vocero y participa en la <strong>plenaria de 3 minutos</strong> con el resto del curso.</p>
+    <div class="steps-row">
+      <div class="step-pill">
+        <div class="step-n">Etapa 1</div>
+        <div class="step-label">Presentación</div>
+        <div class="step-desc">Mapeo biopsicosocial inicial</div>
+      </div>
+      <div class="step-pill">
+        <div class="step-n">Etapa 2</div>
+        <div class="step-label">Análisis</div>
+        <div class="step-desc">Aplicación de conceptos teóricos</div>
+      </div>
+      <div class="step-pill">
+        <div class="step-n">Etapa 3</div>
+        <div class="step-label">Síntesis</div>
+        <div class="step-desc">Plan de manejo + reflexión clínica</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill"></div></div>
+    <div class="progress-text" id="prog-label">Selecciona un caso para comenzar</div>
+  </div>
+
+  <!-- Case selector -->
+  <div class="case-selector">
+    <button class="case-tab active-purple" onclick="selectCaso(0)" id="tab-0">
+      <div class="case-tab-label">Caso 1 · Adultez temprana</div>
+      <div class="case-tab-name">Laura Mendoza</div>
+      <div class="case-tab-sub">28 años · Diseñadora gráfica freelance</div>
+    </button>
+    <button class="case-tab" onclick="selectCaso(1)" id="tab-1">
+      <div class="case-tab-label">Caso 2 · Adultez media</div>
+      <div class="case-tab-name">Andrés Ríos</div>
+      <div class="case-tab-sub">47 años · Contador, casado</div>
+    </button>
+  </div>
+
+  <!-- ══════════ CASO 1 ══════════ -->
+  <div class="case-panel visible" id="panel-0">
+
+    <div class="narrative-block">
+      <div class="narrative-label">Motivo de consulta y contexto</div>
+      <div class="patient-chip">
+        <div class="patient-avatar avatar-purple">LM</div>
+        <span class="patient-chip-name">Laura Mendoza</span>
+        <span class="patient-chip-age">· 28 años · Adultez emergente/temprana</span>
+      </div>
+      <p class="narrative-text">
+        Laura llega a la consulta refiriendo <strong>fatiga persistente de 3 meses</strong>, irregularidades menstruales y dificultad para concentrarse en el trabajo. Es diseñadora gráfica freelance y vive sola desde hace un año, tras mudarse de la casa de sus padres. Recientemente terminó una relación de pareja. Duerme 5 a 6 horas por noche, refiere que "come lo que puede" entre proyectos, consume 2 a 3 tazas de café al día y niega consumo de otras sustancias. Dice sentirse <em>"bloqueada"</em> y sin saber bien <em>"hacia dónde va su vida"</em>.
+      </p>
+    </div>
+
+    <!-- BPS overview -->
+    <div class="bps-grid">
+      <div class="bps-card bio">
+        <div class="bps-label">Biológico</div>
+        <p>Fatiga, irregularidades menstruales, sueño insuficiente, hábitos alimenticios irregulares, consumo de cafeína.</p>
+      </div>
+      <div class="bps-card psi">
+        <div class="bps-label">Psicológico</div>
+        <p>Dificultad de concentración, sensación de bloqueo, duelo por ruptura de pareja, incertidumbre de identidad.</p>
+      </div>
+      <div class="bps-card soc">
+        <div class="bps-label">Social</div>
+        <p>Independencia reciente del hogar, trabajo freelance sin red de apoyo laboral, pérdida de red de soporte afectivo.</p>
+      </div>
+    </div>
+
+    <!-- Step nav caso 0 -->
+    <div class="step-nav-row" id="snav-0">
+      <button class="snav-btn active-purple" onclick="selectStep(0,0)" id="s0-0">Etapa 1: Presentación</button>
+      <button class="snav-btn" onclick="selectStep(0,1)" id="s0-1">Etapa 2: Análisis</button>
+      <button class="snav-btn" onclick="selectStep(0,2)" id="s0-2">Etapa 3: Síntesis</button>
+    </div>
+
+    <!-- Etapa 1 -->
+    <div class="step-panel visible" id="sp-0-0">
+      <p class="step-intro">Antes de plantear hipótesis diagnósticas, el grupo debe identificar qué información del caso pertenece a cada dominio del desarrollo y qué preguntas adicionales serían necesarias en la anamnesis.</p>
+      <ul class="questions">
+        <li class="question-item">
+          <span class="q-num">1</span>
+          <div>
+            <span class="q-text">¿Qué concepto del documento explica por qué Laura siente que su identidad "no está definida" a los 28 años? ¿Es esto esperado en la adultez emergente?</span>
+            <span class="q-tag psi">Psicosocial</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+            <div class="answer-label">Escribe las ideas que surjan en la discusión</div>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">2</span>
+          <div>
+            <span class="q-text">¿Cómo interactúan los tres dominios del desarrollo en los síntomas que refiere Laura? Den un ejemplo concreto apoyado en el texto de Papalia y Feldman.</span>
+            <span class="q-tag int">Integrador</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">3</span>
+          <div>
+            <span class="q-text">Como médico familiar, ¿qué preguntas adicionales harían en la anamnesis para completar el cuadro biopsicosocial? Organícenlas por dominio.</span>
+            <span class="q-tag bio">Biológico</span><span class="q-tag psi">Psicológico</span><span class="q-tag soc">Social</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+      </ul>
+      <div class="action-row">
+        <button class="btn primary-purple" onclick="selectStep(0,1)">Avanzar a Etapa 2 →</button>
+      </div>
+    </div>
+
+    <!-- Etapa 2 -->
+    <div class="step-panel" id="sp-0-1">
+      <p class="step-intro">Con el marco teórico del documento, profundicen en los mecanismos que explican los hallazgos del caso y construyan los diagnósticos diferenciales.</p>
+      <div class="highlight-box amber">
+        <strong>Referencia teórica del documento</strong>
+        <p>El texto señala que en la adultez temprana la condición física alcanza su máximo nivel, pero los factores genéticos <em>interactúan</em> con elecciones de estilo de vida (dieta, actividad física, tabaquismo y consumo de sustancias). Además, esta etapa es crítica para el diagnóstico y manejo de diversos trastornos mentales. Papalia y Feldman también describen el <em>pensamiento posformal</em> como una forma de cognición que integra lógica con experiencia e intuición.</p>
+      </div>
+      <ul class="questions">
+        <li class="question-item">
+          <span class="q-num">4</span>
+          <div>
+            <span class="q-text">El texto menciona el "pensamiento posformal". ¿Cómo podría este tipo de pensamiento estar influyendo en la manera en que Laura describe sus síntomas y enfrenta sus decisiones?</span>
+            <span class="q-tag psi">Cognoscitivo</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">5</span>
+          <div>
+            <span class="q-text">Según el Modelo de los Cinco Factores de Costa y McCrae, ¿qué rasgos de personalidad podrían ser relevantes en este caso? ¿Cómo los evaluarían clínicamente sin una escala formal?</span>
+            <span class="q-tag psi">Psicológico</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">6</span>
+          <div>
+            <span class="q-text">La adultez temprana es una etapa crítica para los trastornos mentales. ¿Qué diagnósticos diferenciales plantean? Organícenlos según sean principalmente biológicos, psicológicos o sociales en su origen.</span>
+            <span class="q-tag int">Diagnóstico diferencial</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">7</span>
+          <div>
+            <span class="q-text">¿Qué papel juegan la transición a la independencia y el trabajo freelance en el desarrollo psicosocial de Laura, según el documento? ¿Son factores de riesgo, de protección, o ambos?</span>
+            <span class="q-tag soc">Psicosocial</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+      </ul>
+      <div class="action-row">
+        <button class="btn" onclick="selectStep(0,0)">← Volver a Etapa 1</button>
+        <button class="btn primary-purple" onclick="selectStep(0,2)">Avanzar a Etapa 3 →</button>
+      </div>
+    </div>
+
+    <!-- Etapa 3 -->
+    <div class="step-panel" id="sp-0-2">
+      <p class="step-intro">Integren todo lo analizado en un plan de manejo biopsicosocial y elaboren la reflexión teórico-clínica que presentarán en plenaria.</p>
+      <ul class="questions">
+        <li class="question-item">
+          <span class="q-num">8</span>
+          <div>
+            <span class="q-text">Construyan un plan de manejo inicial con <em>al menos una acción concreta</em> para cada dominio (biológico, psicológico, social). ¿Qué remitirían y a qué especialista o servicio?</span>
+            <span class="q-tag int">Plan de manejo</span>
+            <textarea class="answer-area" style="min-height:100px;" placeholder="Bio: …&#10;Psi: …&#10;Social: …"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">9</span>
+          <div>
+            <span class="q-text">El enfoque del ciclo vital de Baltes propone que el desarrollo es <em>multidireccional</em>: hay ganancias y pérdidas simultáneas. ¿Cómo aplica este concepto al caso de Laura? ¿Qué está ganando y qué está perdiendo en este momento vital?</span>
+            <span class="q-tag psi">Ciclo vital</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">10</span>
+          <div>
+            <span class="q-text">Como grupo, debatan: ¿es posible abordar este caso de manera integral solo desde medicina familiar, o se requiere un equipo interdisciplinario? Justifiquen con el texto de Papalia y Feldman.</span>
+            <span class="q-tag int">Reflexión crítica</span>
+            <textarea class="answer-area" placeholder="Postura del grupo y argumentos…"></textarea>
+          </div>
+        </li>
+      </ul>
+      <div class="plenaria-box">
+        <div class="plenaria-title">Preparación para plenaria · 3 minutos</div>
+        <p class="plenaria-text">Designen un vocero. Su exposición debe cubrir los tres puntos siguientes:</p>
+        <ul class="plenaria-items">
+          <li><span class="li-n">a</span>Los tres hallazgos biopsicosociales más relevantes del caso</li>
+          <li><span class="li-n">b</span>Su diagnóstico presuntivo principal y por qué lo priorizan</li>
+          <li><span class="li-n">c</span>El concepto del ciclo vital que más influyó en su razonamiento clínico</li>
+        </ul>
+      </div>
+      <div class="action-row">
+        <button class="btn" onclick="selectStep(0,1)">← Volver a Etapa 2</button>
+      </div>
+    </div>
+
+  </div><!-- /panel-0 -->
+
+  <!-- ══════════ CASO 2 ══════════ -->
+  <div class="case-panel" id="panel-1">
+
+    <div class="narrative-block">
+      <div class="narrative-label">Motivo de consulta y contexto</div>
+      <div class="patient-chip">
+        <div class="patient-avatar avatar-teal">AR</div>
+        <span class="patient-chip-name">Andrés Ríos</span>
+        <span class="patient-chip-age">· 47 años · Adultez media</span>
+      </div>
+      <p class="narrative-text">
+        Andrés consulta por <strong>cefalea tensional frecuente</strong>, insomnio de mantenimiento y un episodio reciente de palpitaciones. Es contador, casado hace 20 años. Su hijo mayor de 22 años volvió a vivir con ellos tras perder su empleo; su hijo menor de 18 años aún estudia en casa. Al mismo tiempo, su madre de 74 años fue diagnosticada con demencia leve y Andrés gestiona sus medicamentos y citas médicas. Refiere sentirse <em>"atrapado entre mis hijos y mi mamá"</em>. Ha bajado 4 kg de peso involuntariamente en 3 meses y su esposa le dice que <em>"ya no está presente"</em> en la relación.
+      </p>
+    </div>
+
+    <div class="bps-grid">
+      <div class="bps-card bio">
+        <div class="bps-label">Biológico</div>
+        <p>Cefalea tensional, insomnio de mantenimiento, palpitaciones, pérdida de peso involuntaria de 4 kg en 3 meses.</p>
+      </div>
+      <div class="bps-card psi">
+        <div class="bps-label">Psicológico</div>
+        <p>Sensación de estar "atrapado", ausencia emocional en la pareja, posible crisis/transición de identidad de mitad de vida.</p>
+      </div>
+      <div class="bps-card soc">
+        <div class="bps-label">Social</div>
+        <p>"Generación sándwich": cuidado simultáneo de hijos dependientes y madre anciana con demencia. Nido abarrotado.</p>
+      </div>
+    </div>
+
+    <div class="step-nav-row" id="snav-1">
+      <button class="snav-btn active-teal" onclick="selectStep(1,0)" id="s1-0">Etapa 1: Presentación</button>
+      <button class="snav-btn" onclick="selectStep(1,1)" id="s1-1">Etapa 2: Análisis</button>
+      <button class="snav-btn" onclick="selectStep(1,2)" id="s1-2">Etapa 3: Síntesis</button>
+    </div>
+
+    <!-- Etapa 1 -->
+    <div class="step-panel visible" id="sp-1-0">
+      <p class="step-intro">Inicien mapeando los hallazgos del caso en los tres dominios del desarrollo de la adultez media antes de proponer hipótesis diagnósticas.</p>
+      <ul class="questions">
+        <li class="question-item">
+          <span class="q-num">1</span>
+          <div>
+            <span class="q-text">El documento habla específicamente de la "generación sándwich". ¿Qué es exactamente este concepto? ¿Cómo se manifiesta con precisión en el caso de Andrés?</span>
+            <span class="q-tag soc">Social</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">2</span>
+          <div>
+            <span class="q-text">¿Qué datos de la anamnesis indican que el estrés de Andrés está teniendo consecuencias físicas directas? ¿Qué mecanismo describe el documento para explicar esta relación?</span>
+            <span class="q-tag bio">Biológico</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">3</span>
+          <div>
+            <span class="q-text">¿Cuáles serían sus primeras preguntas en consulta para evaluar el riesgo cardiovascular y la salud mental de forma integrada? ¿Incluirían a la esposa en la consulta? ¿Por qué?</span>
+            <span class="q-tag int">Anamnesis</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+      </ul>
+      <div class="action-row">
+        <button class="btn primary-teal" onclick="selectStep(1,1)">Avanzar a Etapa 2 →</button>
+      </div>
+    </div>
+
+    <!-- Etapa 2 -->
+    <div class="step-panel" id="sp-1-1">
+      <p class="step-intro">Profundicen en los mecanismos cognitivos y psicosociales de la adultez media que explican el cuadro clínico de Andrés.</p>
+      <div class="highlight-box amber">
+        <strong>Referencia teórica del documento</strong>
+        <p>En la adultez media, la <em>inteligencia cristalizada</em> (conocimiento acumulado y pericia) suele aumentar o estabilizarse, mientras que la fluida puede declinar levemente. El estrés crónico y las emociones impactan directamente en la salud física. El concepto de <em>generatividad vs. estancamiento</em> (Erikson) describe el interés por guiar a la siguiente generación como tarea central de esta etapa.</p>
+      </div>
+      <ul class="questions">
+        <li class="question-item">
+          <span class="q-num">4</span>
+          <div>
+            <span class="q-text">¿Cómo podría la "inteligencia cristalizada" de Andrés ser un recurso terapéutico en su manejo? ¿Y cómo el estrés crónico podría estar limitando sus capacidades cognitivas?</span>
+            <span class="q-tag psi">Cognoscitivo</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">5</span>
+          <div>
+            <span class="q-text">El concepto de "generatividad vs. estancamiento" (Erikson) aparece en el texto. ¿En cuál polo ubicarían a Andrés actualmente? ¿Qué evidencia del caso apoya su respuesta?</span>
+            <span class="q-tag psi">Psicosocial</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">6</span>
+          <div>
+            <span class="q-text">El documento plantea que la "crisis de la mitad de la vida" es en realidad una <em>transición de identidad</em>. ¿Qué elementos del caso de Andrés representan una transición saludable y cuáles son señales de alarma clínica?</span>
+            <span class="q-tag int">Ciclo vital</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">7</span>
+          <div>
+            <span class="q-text">¿Qué diagnósticos diferenciales cardiovasculares y de salud mental consideran prioritarios? ¿Qué paraclínicos solicitarían y en qué orden?</span>
+            <span class="q-tag bio">Diagnóstico diferencial</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+      </ul>
+      <div class="action-row">
+        <button class="btn" onclick="selectStep(1,0)">← Volver a Etapa 1</button>
+        <button class="btn primary-teal" onclick="selectStep(1,2)">Avanzar a Etapa 3 →</button>
+      </div>
+    </div>
+
+    <!-- Etapa 3 -->
+    <div class="step-panel" id="sp-1-2">
+      <p class="step-intro">Integren el caso en un plan de manejo y conecten con el marco teórico del ciclo vital para la plenaria.</p>
+      <ul class="questions">
+        <li class="question-item">
+          <span class="q-num">8</span>
+          <div>
+            <span class="q-text">Diseñen un plan de manejo con una acción específica por dominio biopsicosocial. ¿Incluirían a la esposa en el proceso terapéutico? Argumenten su decisión.</span>
+            <span class="q-tag int">Plan de manejo</span>
+            <textarea class="answer-area" style="min-height:100px;" placeholder="Bio: …&#10;Psi: …&#10;Social: …"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">9</span>
+          <div>
+            <span class="q-text">El enfoque de Baltes señala que el desarrollo está influido por el contexto histórico y cultural. En el contexto latinoamericano, ¿cómo influye la cultura del cuidado familiar en la carga que lleva Andrés? ¿Cómo modifica esto su abordaje clínico?</span>
+            <span class="q-tag soc">Contexto cultural</span>
+            <textarea class="answer-area" placeholder="Notas del grupo…"></textarea>
+          </div>
+        </li>
+        <li class="question-item">
+          <span class="q-num">10</span>
+          <div>
+            <span class="q-text">Comparen el caso de Andrés con el de Laura (Caso 1): ¿qué diferencias y semejanzas identifican en cómo los retos biopsicosociales se expresan en la adultez temprana versus la adultez media?</span>
+            <span class="q-tag int">Comparativo</span>
+            <textarea class="answer-area" placeholder="Diferencias: …&#10;Semejanzas: …"></textarea>
+          </div>
+        </li>
+      </ul>
+      <div class="plenaria-box">
+        <div class="plenaria-title">Preparación para plenaria · 3 minutos</div>
+        <p class="plenaria-text">Designen un vocero. Su exposición debe cubrir los tres puntos siguientes:</p>
+        <ul class="plenaria-items">
+          <li><span class="li-n">a</span>Los tres hallazgos biopsicosociales más relevantes del caso</li>
+          <li><span class="li-n">b</span>Su diagnóstico presuntivo principal y por qué lo priorizan</li>
+          <li><span class="li-n">c</span>El concepto del ciclo vital que más influyó en su razonamiento clínico</li>
+        </ul>
+      </div>
+      <div class="action-row">
+        <button class="btn" onclick="selectStep(1,1)">← Volver a Etapa 2</button>
+      </div>
+    </div>
+
+  </div><!-- /panel-1 -->
+
+  <!-- Notes -->
+  <div class="notes-section">
+    <div class="notes-title">Notas adicionales del grupo</div>
+    <textarea class="notes-area" placeholder="Reflexiones generales, preguntas para el docente, ideas que surjan durante la discusión…"></textarea>
+  </div>
+
+</main>
+
+<footer class="page-footer">
+  <span class="footer-text">Basado exclusivamente en Papalia & Feldman · Desarrollo Humano</span>
+  <span class="footer-course">Medicina Familiar · 2.º Semestre Pregrado</span>
+</footer>
+
+<script>
+  var casoActivo = 0;
+  var pasos = [0, 0];
+  var color = ['purple','teal'];
+
+  function selectCaso(idx) {
+    casoActivo = idx;
+    document.getElementById('panel-0').classList.toggle('visible', idx===0);
+    document.getElementById('panel-1').classList.toggle('visible', idx===1);
+    document.getElementById('tab-0').className = 'case-tab' + (idx===0 ? ' active-purple' : '');
+    document.getElementById('tab-1').className = 'case-tab' + (idx===1 ? ' active-teal' : '');
+    updateProgress();
+  }
+
+  function selectStep(caso, step) {
+    pasos[caso] = step;
+    var c = color[caso];
+    for (var s = 0; s < 3; s++) {
+      var btn = document.getElementById('s'+caso+'-'+s);
+      var panel = document.getElementById('sp-'+caso+'-'+s);
+      btn.className = 'snav-btn' + (s === step ? ' active-'+c : (s < step ? ' done' : ''));
+      panel.classList.toggle('visible', s === step);
+    }
+    updateProgress();
+    window.scrollTo({ top: document.getElementById('snav-'+caso).offsetTop - 80, behavior: 'smooth' });
+  }
+
+  function updateProgress() {
+    var total = pasos[0] + pasos[1];
+    var pct = Math.round((total / 4) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    var msgs = [
+      'Selecciona un caso para comenzar',
+      'En progreso — primera etapa en curso',
+      'Avanzando — mitad del recorrido completado',
+      'Casi listos — preparando la plenaria',
+      'Actividad completada — ¡a la plenaria!'
+    ];
+    document.getElementById('prog-label').textContent = msgs[Math.min(total, 4)];
+  }
+</script>
+</body>
+</html>
